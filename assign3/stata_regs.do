@@ -178,6 +178,27 @@ esttab est* using "output/table_2_log_distance.tex", $general keep(log_distance)
 	labels("N" "\$R^2\$" "Destination FE" "Origin FE" "Command" "Run Time")) ///
 	prehead("\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi} \begin{tabular}{l*{8}{>{\centering\arraybackslash}p{0.15\textwidth}}} \toprule \\ \\ Dependent Variable: & Log(\$x\$) & \multicolumn{2}{c}{Log(\$x+1\$)} & \multicolumn{1}{c}{Log(\$x+1e^{-3}\$)} & \multicolumn{1}{c}{Log(\$\frac{x_{jj}}{1e^{-10}}\$)} & \multicolumn{3}{c}{x} \\ \cmidrule(lr){2-2} \cmidrule(lr){3-4} \cmidrule(lr){5-5} \cmidrule(lr){6-6} \cmidrule(lr){7-9} ") 
 
+***************************
+*** Figure 1: Residuals ***
+***************************
+cap drop resids fitted 
+reghdfe log_flows log_distance, absorb(home_id work_id) resid(resids)
+predict fitted
+
+reg log_flows log_distance i.home_id i.work_id
+hettest
+
+set scheme plotplain
+binscatter resids fitted if flows!=0 & fitted <= 2.5, nq(100) linetype(none) ///
+	xtitle("Residuals") ytitle("Fitted Values") text(1 1 "`r(chi2)'") ///
+	color(edkblue%80)
+gr export "output/residuals_bin.pdf"
+
+twoway scatter resids fitted if flows!=0 & fitted <= 2.5, ///
+	xtitle("Residuals") ytitle("Fitted Values") text(1 1 "`r(chi2)'") ///
+	color(edkblue%80)
+gr export "output/residuals_scatter.pdf"
+	
 ******************************************
 *** Table 3: Comparing across programs ***
 ******************************************
